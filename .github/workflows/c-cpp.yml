@@ -15,23 +15,34 @@ jobs:
 
     steps:
     - name: Checkout repository
-      uses: actions/checkout@v4  # 检出代码
+      uses: actions/checkout@v2  # 检出代码
 
-    - name: Set up MSYS2
+    - name: Install MSYS2 and GCC
       run: |
-        choco install msys2
-        refreshenv
-        pacman -Syu --noconfirm
-        pacman -S --noconfirm base-devel mingw-w64-x86_64-gcc
+        # 安装 MSYS2 包管理器
+        choco install msys2 -y
+        refreshenv  # 刷新环境变量
+
+        # 安装并更新 MSYS2 系统
+        pacman -Syu --noconfirm  # 更新 MSYS2 和所有包
+        pacman -S --noconfirm base-devel mingw-w64-x86_64-gcc  # 安装基本开发工具和 GCC
+
+    - name: Check MSYS2 and GCC Installation
+      run: |
+        pacman -Qs gcc  # 检查 gcc 是否安装成功
+        gcc --version  # 打印 GCC 版本，确认是否安装成功
 
     - name: Build with g++
       run: |
-        # 使用 g++ 编译 C++ 代码
-        g++ -o my_program.exe src/main.cpp  # 假设你的 C++ 源文件位于 src 目录
-        ls -al  # 列出文件查看输出
+        g++ -o my_program.exe src/UnlockDB2.cpp  # 编译源代码
+        dir  # 打印当前目录，确认文件是否生成
+
+    - name: List files before upload
+      run: |
+        dir  # 确认 my_program.exe 是否存在
 
     - name: Upload .exe as artifact
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v3  # 上传构建好的 .exe 文件
       with:
         name: my_program
-        path: my_program.exe  # 上传生成的 .exe 文件
+        path: my_program.exe  # 确保路径正确
